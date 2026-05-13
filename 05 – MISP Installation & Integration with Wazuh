@@ -1,0 +1,39 @@
+1. Install MISP on a VM
+(Install MISP on a separate VM. Running Wazuh, MISP, and Caldera on the same VM can overload resources.)
+Download MISP: https://www.misp-project.org/
+Import the VM into VMware/VirtualBox OR install manually on Ubuntu 24.04 following the official guide: MISP Installation Guide
+
+2. Configure MISP
+Start the MISP VM and log in to the web interface: https://<MISP-IP>.
+Create an admin user if necessary.
+Create a test event:
+Event Name: Windows-Test-Threat
+Threat Type: Malware / Other
+Attribute: IP address of the Windows 10 agent
+Save the event.
+Copy the API key(auth key) of your MISP user — you will need this for Wazuh integration.
+
+3. Configure Wazuh to Fetch MISP Events
+Edit Wazuh manager configuration:
+sudo nano /var/ossec/etc/ossec.conf
+Add the MISP Wodle section (replace <MISP-IP> and <MISP-API-KEY> with your actual values):
+<wodle name="misp">
+<disabled>no</disabled>
+<interval>1m</interval>
+<url>https://<MISP-IP></url>
+<key><MISP-API-KEY></key>
+<verifycert>no</verifycert>
+</wodle>
+Save the file and restart Wazuh:
+sudo systemctl restart wazuh-manager
+
+4. Verify Event Fetching
+Check Wazuh logs:
+sudo tail -f /var/ossec/logs/ossec.log
+You should see lines similar to:
+misp: Event <ID> fetched successfully
+
+5. Test Detection
+Simulate activity from the Windows agent (e.g., ping, scripts, or monitored actions).
+Wazuh should generate an alert for the IP fetched from MISP.
+Verify in the Wazuh Dashboard → Alerts.
