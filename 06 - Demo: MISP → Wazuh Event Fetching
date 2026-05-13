@@ -1,0 +1,62 @@
+This guide shows how to verify that Wazuh is successfully fetching events from MISP.
+1. Ensure Wazuh and MISP are Running
+Wazuh Manager should be active:
+sudo systemctl status wazuh-manager(check if it shows active and running)
+MISP VM should be powered on and accessible via its web interface (https://<MISP-IP>).
+
+2. Create a Test Event in MISP
+Log in to MISP.
+Navigate to Events → Add Event.
+Fill in event details:
+Event Name: Windows-Test-Threat (example)
+Threat Type: Other or Malware
+Add an attribute:
+Type: IP Address
+Value: Any test IP (e.g., your Windows machine IP or a placeholder)
+Save the event.
+Copy your MISP API key from your user settings.
+
+3. Configure Wazuh to Fetch MISP Events
+Edit Wazuh configuration:
+sudo nano /var/ossec/etc/ossec.conf
+Add the MISP Wodle (replace <MISP-IP> and <MISP-API-KEY>):
+<wodle name="misp">
+<disabled>no</disabled>
+<interval>1m</interval>
+<url>https://<MISP-IP></url>
+<key><MISP-API-KEY></key>
+<verifycert>no</verifycert>
+</wodle>
+Save and exit.
+Restart Wazuh:
+sudo systemctl restart wazuh-manager(optional recheck its status to make sure everything is running smooth)
+
+4. Verify Event Fetching
+Check Wazuh logs:
+sudo tail -f /var/ossec/logs/ossec.log
+You should see entries like:
+misp: Event <ID> fetched successfully
+This confirms Wazuh is receiving events from MISP.
+Bonus: Fetch Events via Python:
+#!/usr/bin/env python3
+import requests
+# MISP settings
+misp_url = "https://<MISP-IP>"
+misp_key = "<MISP-API-KEY>"
+verify_cert = False # True if using valid SSL cert
+headers = {
+'Authorization': misp_key,
+'Accept': 'application/json',
+'Content-Type': 'application/json'
+}
+# Fetch recent events
+response = requests.get(f"{misp_url}/events/restSearch", headers=headers, verify=verify_cert)
+events = response.json()
+for event in events.get('response', []):
+print(f"Event ID: {event['Event']['id']}, Name: {event['Event']['info']}")
+for attr in event['Event']['Attribute']:
+print(f" Attribute: {attr['type']} = {attr['value']}")
+Notes to include in the documentation:
+Requires requests Python library: pip install requests
+Only fetches events, does not trigger Wazuh alerts
+Intended as a learning/demo tool for threat intelligence automation
