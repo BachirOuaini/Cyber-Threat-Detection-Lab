@@ -1,0 +1,57 @@
+This guide shows how to run a red-team operation on the Windows agent using Caldera, generating events that Wazuh will detect.
+
+1- Prepare the Windows Agent
+
+Ensure the Windows 10 agent is installed and connected to Caldera (see 02-windows-agent.md).
+
+Confirm the agent appears as Active in the Caldera web interface.
+
+2- Create an Operation in Caldera
+
+Navigate to Operations → New Operation.
+
+Configure the operation:
+
+Name: Test-RedTeam
+
+Adversary: Choose Sandcat or any pre-defined adversary profile.
+
+Targets: Select your Windows agent.
+
+Executor: PowerShell/Windows.
+
+Click Create Operation.
+
+3- Run a Controlled Attack
+
+Click Start Operation.
+
+Monitor the operation in real-time:
+
+Tasks will execute on the agent.
+
+The agent will perform activities such as:
+
+Ping tests
+
+File creation/modification
+
+Command execution
+
+4- Verify Detection in Wazuh
+
+Access the Wazuh dashboard.
+
+Navigate to Alerts.
+
+Look for events triggered by the agent IP or executed commands.
+
+Example alert: "Windows agent executed ping to suspicious IP".
+
+5- Notes
+
+This simulation uses only safe, controlled scripts from Caldera.
+
+Wazuh should generate alerts according to configured rules.
+
+Once confirmed, these alerts demonstrate the end-to-end detection from a simulated attack on Windows to Wazuh monitoring.
