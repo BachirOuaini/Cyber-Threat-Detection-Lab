@@ -1,0 +1,75 @@
+This guide walks you through installing Wazuh Manager, Indexer, and Dashboard and configuring it for the lab.
+
+Reference: Wazuh Installation Guide
+
+1- Update System
+
+sudo apt update && sudo apt upgrade -y
+sudo apt install curl gnupg lsb-release -y
+
+2- Add Wazuh Repository
+
+curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | sudo apt-key add -
+echo "deb https://packages.wazuh.com/4.x/apt/ stable main" | sudo tee /etc/apt/sources.list.d/wazuh.list
+sudo apt update
+
+3- Install Full Wazuh Stack (Manager + Indexer + Dashboard)
+
+curl -sO https://packages.wazuh.com/4.7/wazuh-install.sh
+sudo bash wazuh-install.sh -a -i
+
+-a = all-in-one install
+-i = ignore OS compatibility check
+
+Wait 15–25 minutes. The installer may pause during Indexer setup do not interrupt.
+
+4- Verify Services
+Check that all components are running:
+
+sudo systemctl status wazuh-manager
+sudo systemctl status wazuh-indexer
+sudo systemctl status wazuh-dashboard
+
+All should show active (running).
+
+5- Regenerate Indexer Passwords
+After install, passwords may have changed. Run:
+
+sudo /usr/share/wazuh-indexer/plugins/opensearch-security/tools/wazuh-passwords-tool.sh --change-all
+
+Copy the new admin password printed (e.g., wtkdbqyM?wJAbg1p5KTY5oEOj3Bgbqh9).
+
+6- Update Dashboard Config
+Edit the dashboard config to match the new password:
+
+sudo nano /etc/wazuh-dashboard/opensearch_dashboards.yml
+
+Set / replace these lines:
+
+opensearch.username: "admin"
+opensearch.password: "password"
+
+Remove any # in front of the lines and keep quotes for special characters.
+
+Restart dashboard:
+
+sudo systemctl restart wazuh-dashboard
+
+7- Verify Manager API
+
+curl -k https://127.0.0.1:55000
+curl -k https://:55000
+
+Should return API info if Manager is running.
+
+8- Access Web Interface
+Open browser:
+
+https://
+or
+https://localhost
+
+Login with:
+
+User: admin
+Password: <the new password from step 5>
