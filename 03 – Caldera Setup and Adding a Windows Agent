@@ -1,0 +1,61 @@
+1- Deploy Caldera Server
+
+Prepare a Linux VM (Ubuntu 24.04 recommended).
+
+Clone the Caldera repository:
+
+git clone https://github.com/mitre/caldera.git --recursive
+cd caldera
+
+Create a Python virtual environment:
+
+python3 -m venv venv
+source venv/bin/activate
+
+Install dependencies:
+
+pip install -r requirements.txt
+
+Start the Caldera server:
+
+python server.py
+
+Access the web interface at:
+
+http://:(PortNumber)
+
+Default login: admin / admin
+
+Change the password immediately for security.
+
+2- Add a Windows Agent (Red Team Agent)
+
+Navigate to Agents → Add Agent in Caldera.
+
+Fill in the details:
+
+Agent name: Win10-RedTeam
+
+Platform: Windows
+
+Group: Optional
+
+Server IP: Caldera server IP
+
+Generate the agent installer script.
+
+On the Windows VM turn off windows defender and then run the script in PowerShell as Administrator.
+
+The agent should connect automatically to Caldera and appear in the agent list.
+
+3- Verify Connection
+
+Check the agent is listed in Caldera → Agents → Active.
+
+Confirm the agent is reporting its status and can receive tasks.
+
+4- Notes
+
+Ensure Windows firewall allows outbound connections to the Caldera server.
+
+Agents will be used to execute controlled attacks to test Wazuh detection.
